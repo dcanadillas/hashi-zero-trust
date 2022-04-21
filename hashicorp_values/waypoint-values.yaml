@@ -1,0 +1,26 @@
+server:
+  enabled: true
+  image:
+    repository: "docker.io/hashicorp/waypoint"
+    tag: "0.8.1"
+    # tag: "latest"
+    pullPolicy: IfNotPresent
+runner:
+  enabled: true
+  image:
+    repository: "docker.io/hashicorp/waypoint"
+    tag: "0.8.1"
+    pullPolicy: Always
+    # tag: "latest"
+  odr:
+    # The image to use for the on-demand runner.
+    image:
+      repository: "docker.io/hashicorp/waypoint-odr"
+      tag: "0.8.1"
+      pullPolicy: IfNotPresent
+      # tag: "latest"
+ui:
+  # Configure the service for the Waypoint UI.
+  service:
+    enabled: true
+    type: LoadBalancer

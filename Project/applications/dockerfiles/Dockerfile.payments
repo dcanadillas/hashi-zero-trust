@@ -1,0 +1,7 @@
+FROM dcanadillas/hashicups-payments:${version}
+
+COPY ./waypoint-entrypoint /usr/local/bin/
+
+ENTRYPOINT [ "waypoint-entrypoint" ] 
+CMD [ "java", "-jar", "./spring-boot-payments-${jar_version}.jar" ]
+

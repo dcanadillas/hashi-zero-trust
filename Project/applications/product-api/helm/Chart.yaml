@@ -1,0 +1,6 @@
+apiVersion: v2
+name: hashicups-product-api
+description: Helm chart for the HashiCups product API service
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

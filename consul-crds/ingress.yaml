@@ -1,0 +1,14 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: IngressGateway
+metadata:
+  name: ingress-gateway
+  # namespace: apps
+spec:
+  listeners:
+    - port: 8080
+      protocol: http
+      services:
+        - name: frontend
+          # namespace: apps # <== For Consul Enterprise Namespaces
+          hosts: 
+            - '*'

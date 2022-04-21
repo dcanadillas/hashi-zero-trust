@@ -1,0 +1,5 @@
+build/**
+.waypoint/**
+
+**/*.wpvars
+images-runner/**

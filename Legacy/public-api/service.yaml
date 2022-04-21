@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: public-api
+  namespace: apps
+spec:
+  selector:
+    myapp: public-api
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+# ---
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   name: payments
+# automountServiceAccountToken: true

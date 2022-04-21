@@ -1,0 +1,148 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: product-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: productapi
+spec:
+  selector:
+    app: productapi
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9090
+      targetPort: 9090
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: product-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: productapi
+automountServiceAccountToken: true
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-configmap-template
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: productapi
+data:
+  # We need to escape "go-template" brackets {{ "{{" }} because it is used in Consul-Template for the configmap and not messing around with Helm template 
+  config: |
+    {{ "{{" }} range service "postgres" {{ "}}" }}
+    {
+      "db_connection": "host={{ "{{" }} .Name {{ "}}" }} port={{ "{{" }} .Port {{ "}}" }} {{ "{{" }} with secret "kv/data/hashicups-db" {{ "}}" }}user={{ "{{" }} .Data.data.username {{ "}}" }} password={{ "{{" }} .Data.data.password {{ "}}" }}{{ "{{" }}end{{ "}}" }} dbname=products sslmode=disable",
+      "bind_address": ":9090",
+      "metrics_address": ":9103"
+    }
+    {{ "{{" }} end {{ "}}" }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: product-api
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: productapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: productapi
+  template:
+    metadata:
+      labels:
+        app: productapi
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-token: "true"
+        vault.hashicorp.com/role: "hashicups"
+        vault.hashicorp.com/agent-init-first: "true"
+        consul.hashicorp.com/connect-inject: "true"
+        # consul.hashicorp.com/connect-service: "product-api"
+        # consul.hashicorp.com/connect-service-upstreams: "postgres:5432"
+    spec:
+      serviceAccountName: product-api
+      volumes:
+        - name: config-template
+          configMap:
+            name: db-configmap-template
+            items:
+            - key: config
+              path: config.tpl
+        - name: config
+          emptyDir: {}
+      
+      initContainers:
+        - name: consul-template-init
+          image: hashicorp/consul-template
+          command: 
+            - consul-template
+          args:
+            - -consul-addr=consul-server.consul:8501
+            # - -consul-token=c6d96bd5-299a-3aae-5b46-ded5cf117684
+            - -consul-ssl
+            - -consul-ssl-verify=false
+            - -vault-addr=http://vault-ui.vault:8200
+            - -vault-agent-token-file=/vault/secrets/token
+            - -template=/template/config.tpl:/config/conf.json
+            - -once
+          # env:
+            # - name: CONSUL_NAMESPACE
+            #   value: "apps"
+          volumeMounts:
+            - name: config-template
+              mountPath: /template
+            - name: config
+              mountPath: /config
+          imagePullPolicy: IfNotPresent
+      containers:
+        - name: product-api
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          ports:
+            - containerPort: 9090
+              protocol: TCP
+            - containerPort: 9103
+              protocol: TCP
+          {{- with .Values.env }}
+          env:
+          {{- toYaml . | nindent 12 }}
+          {{- end }} 
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 9090
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 30
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+        - name: consul-template-sidecar
+          image: hashicorp/consul-template
+          args:
+            - "-consul-addr=consul-server.consul:8501"
+            # - "-consul-token=c6d96bd5-299a-3aae-5b46-ded5cf117684"
+            - "-consul-ssl"
+            - "-consul-ssl-verify=false"
+            - -vault-addr=http://vault-ui.vault:8200
+            - -vault-agent-token-file=/vault/secrets/token
+            - "-template=/template/config.tpl:/config/conf.json"
+          env:
+            # - name: CONSUL_NAMESPACE
+            #   value: "apps"
+          volumeMounts:
+          - name: config-template
+            mountPath: /template
+          - name: config
+            mountPath: /config

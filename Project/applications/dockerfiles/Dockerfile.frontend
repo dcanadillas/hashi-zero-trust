@@ -1,0 +1,7 @@
+FROM hashicorpdemoapp/frontend:${version}
+
+COPY ./waypoint-entrypoint /usr/local/bin/
+
+ENTRYPOINT [ "waypoint-entrypoint" ]
+
+CMD [ "nginx", "-g", "daemon off;" ]

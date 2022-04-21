@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: apps
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: frontend
+      app: frontend
+  template:
+    metadata:
+      labels:
+        service: frontend
+        app: frontend
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9102"
+        consul.hashicorp.com/connect-inject: "true"
+        consul.hashicorp.com/connect-service: "frontend"
+        # consul.hashicorp.com/connect-service-upstreams: "public-api:8080"
+        consul.hashicorp.com/service-tags: "v1"
+        # consul.hashicorp.com/connect-service-protocol: "http"
+    spec:
+      serviceAccountName: frontend
+      volumes:
+      - name: config
+        configMap:
+          name: nginx-configmap
+          items:
+          - key: config
+            path: default.conf
+      containers:
+        - name: frontend
+          image: ${artifact.image}:${artifact.tag}
+          env:
+            %{ for k,v in entrypoint.env }
+            - name: "name"
+              value: "value"
+            %{ endfor }
+            - name: "PORT"
+              value: "80"
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/conf.d
+              readOnly: true

@@ -1,0 +1,8 @@
+FROM redis:${version}
+
+COPY ./waypoint-entrypoint /usr/local/bin/
+
+ENTRYPOINT [ "waypoint-entrypoint" ]
+
+CMD [ "redis-server"]
+

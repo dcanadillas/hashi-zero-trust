@@ -1,0 +1,65 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: front-to-public-api
+spec:
+  destination:
+    name: public-api
+  sources:
+    - name: frontend
+      action: allow
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: public-api-to-product
+spec:
+  destination:
+    name: product-api
+  sources:
+    - name: public-api
+      action: allow
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: public-api-to-payments
+spec:
+  destination:
+    name: payments
+  sources:
+    - name: public-api
+      action: allow
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: product-api-to-postgres
+spec:
+  destination:
+    name: postgres
+  sources:
+    - name: product-api
+      action: allow
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: payments-to-redis
+spec:
+  destination:
+    name: redis
+  sources:
+    - name: payments
+      action: allow
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: ingress-to-frontend
+spec:
+  destination:
+    name: frontend
+  sources:
+    - name: ingress-gateway
+      action: allow

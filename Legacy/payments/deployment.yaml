@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments
+  namespace: apps
+  labels:
+    app: payments
+    myapp: payments
+spec:
+  selector:
+    matchLabels:
+      myapp: payments
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-token: "true"
+        vault.hashicorp.com/role: "vault"
+        vault.hashicorp.com/agent-init-first: "true"
+        consul.hashicorp.com/connect-inject: "true"
+        consul.hashicorp.com/connect-service: payments
+      labels:
+        app: payments
+        myapp: payments
+    spec:
+      containers:
+      - image: ${artifact.image}:${artifact.tag}
+        imagePullPolicy: Always
+        name: payments
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+          %{ for k,v in entrypoint.env }
+          - name: ${k}
+            value: "${v}"
+          %{ endfor }
+          - name: "PORT"
+            value: "8080"
+        resources: {}
+      serviceAccount: payments
+      serviceAccountName: payments

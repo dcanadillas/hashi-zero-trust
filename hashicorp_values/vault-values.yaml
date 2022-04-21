@@ -1,0 +1,8 @@
+global:
+  enabled: true
+injector:
+  enabled: true
+server:
+  enabled: true
+  dev:
+    enabled: true

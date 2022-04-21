@@ -1,0 +1,8 @@
+FROM hashicorpdemoapp/product-api-db:${version}
+
+COPY ./waypoint-entrypoint /usr/local/bin/
+
+ENTRYPOINT [ "waypoint-entrypoint" ]
+
+CMD [ "docker-entrypoint.sh", "postgres" ]
+

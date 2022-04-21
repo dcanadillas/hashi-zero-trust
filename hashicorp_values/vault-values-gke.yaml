@@ -1,0 +1,67 @@
+global:
+  enabled: true
+  tlsDisable: true
+injector:
+  # True if you want to enable vault agent injection.
+  enabled: true
+  replicas: 1
+
+server:
+  enabled: true
+  # enterpriseLicense:
+  #   secretName: "vault-ent-license"
+  #   secretKey: "license"
+
+  image:
+    repository: "hashicorp/vault"
+    # repository: "hashicorp/vault-enterprise"
+    tag: "1.10.0"
+    # tag: "1.10.0_ent"
+    pullPolicy: IfNotPresent
+  # affinity: # <=== Empty for one node deployment
+
+  ha:
+    enabled: true
+    replicas: 3
+
+    # Set the api_addr configuration for Vault HA
+    # See https://www.vaultproject.io/docs/configuration#api_addr
+    # If set to null, this will be set to the Pod IP Address
+    apiAddr: null
+    raft:
+      enabled: true
+      setNodeId: true
+
+      config: |
+        ui = true
+        listener "tcp" {
+          tls_disable = 1
+          address = "[::]:8200"
+          cluster_address = "[::]:8201"
+        }
+
+        storage "raft" {
+          path = "/vault/data"
+          retry_join {
+            leader_api_addr = "http://vault-0.vault-internal:8200"
+          }
+          retry_join {
+            leader_api_addr = "http://vault-1.vault-internal:8200"
+          }
+          retry_join {
+            leader_api_addr = "http://vault-2.vault-internal:8200"
+          }
+
+        }
+        replication {
+          resolver_discover_servers = false
+        }
+
+# Vault UI
+ui:
+  enabled: true
+  serviceType: "LoadBalancer"
+  # serviceType: "NodePort"
+  # serviceNodePort: 31000
+  externalPort: 8200
+  targetPort: 8200

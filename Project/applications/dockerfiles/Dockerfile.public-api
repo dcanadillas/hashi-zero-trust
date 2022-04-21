@@ -1,0 +1,6 @@
+FROM hashicorpdemoapp/public-api:${version}
+
+COPY ./waypoint-entrypoint /usr/local/bin/
+
+ENTRYPOINT [ "waypoint-entrypoint", "/app/public-api" ]
+

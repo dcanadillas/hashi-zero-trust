@@ -1,0 +1,13 @@
+versions = {
+    redis = "latest"
+    payments = "v0.0.15"
+    postgres = "v0.0.19"
+    product-api = "v0.0.19"
+    public-api = "v0.0.5"
+    frontend = "v0.0.7"
+}
+
+registry = "<your_registry>"
+
+# Use "platform=linux/arm64" if you want to deploy on an ARM64 architecture like Apple M1
+platform = "linux/amd64"
