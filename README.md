@@ -140,11 +140,13 @@ waypoint init
 waypoint up
 ```
 
-> NOTE: The images are built for x86 architecture. If you are running an ARM based machine like an Apple M1, you should need to build the whole project building and doing a push to your container registry. This can be done in the other Waypoint configuration located at `Project/applications/waypoint.hcl`
-> In this case you will need to specify your Waypoint input variables:
+> NOTE: The images are built for x86 architecture. If you are running an ARM based machine like an Apple M1, you can do it by changing the `platform` parameter value to `linux/arm64`:
 > ```
-> waypoint up -var registry=<your_docker_registry> -var platform=linux/arm64
+> waypoint up -var platform=linux/arm64
 > ```
+> This uses the images with the tag `*-waypoint-arm64` from `ghcr.io/dcanadillas` which are build for `arm64` architecture.
+>
+> Also, if you can build the whole project building and doing a push to your container registry. This can be done in the other Waypoint configuration located at `Project/applications/waypoint.hcl`. Take a look at [this `README`](./Project/applications/README.md).
 
 The background process of previous commands is:
 * It pulls the required microservices of the application from ``ghcr.io/dcanadillas/hashicups/*` using the [Waypoint Docker Plugin](https://www.waypointproject.io/plugins/docker#docker-pull-builder)
