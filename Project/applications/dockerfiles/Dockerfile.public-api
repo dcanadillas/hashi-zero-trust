@@ -1,6 +1,9 @@
+FROM hashicorp/waypoint:latest as waypoint
+
 FROM hashicorpdemoapp/public-api:${version}
 
-COPY ./waypoint-entrypoint /usr/local/bin/
+COPY --from=waypoint /usr/bin/waypoint-entrypoint /usr/local/bin 
+# COPY ./waypoint-entrypoint /usr/local/bin/
 
 ENTRYPOINT [ "waypoint-entrypoint", "/app/public-api" ]
 

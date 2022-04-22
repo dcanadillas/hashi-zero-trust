@@ -3,3 +3,5 @@ build/**
 
 **/*.wpvars
 images-runner/**
+
+**/waypoint-entrypoint

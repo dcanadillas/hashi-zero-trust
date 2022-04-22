@@ -48,14 +48,20 @@ runner {
 app "redis" {
   path = "${path.project}/redis"
   build {
-    use "docker" {
-      context = "${path.project}"
-      dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.redis",{
-        version = var.versions.redis
-      })
-      buildkit = true
-      platform = var.platform
-      disable_entrypoint = true
+    ## Use the stanza below if we want to inject the entrypoint manually
+    # use "docker" {
+    #   context = "${path.project}"
+    #   dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.redis",{
+    #     version = var.versions.redis
+    #   })
+    #   buildkit = true
+    #   platform = var.platform
+    #   disable_entrypoint = true
+    # }
+    use "docker-pull" {
+      image = "redis"
+      tag = var.versions.redis
+      disable_entrypoint = false
     }
     registry {
      use "docker" {
@@ -78,8 +84,8 @@ app "redis" {
         value = "redis"
       }
 
-      // We use a values file so we can set the entrypoint environment
-      // variables into a rich YAML structure. This is easier than --set
+      # We use a values file so we can set the entrypoint environment
+      # variables into a rich YAML structure. This is easier than --set
       values = [
         file(templatefile("${path.app}/helm/values.yaml.tpl")),
       ]
@@ -95,28 +101,30 @@ app "postgres" {
   
   config {
     env = {
-      "POSTGRES_USER" = configdynamic("vault", {
+      "POSTGRES_USER" = dynamic("vault", {
         path = "kv/data/hashicups-db"
         key = "data/username"
       })
-      "POSTGRES_PASSWORD" = configdynamic("vault", {
+      "POSTGRES_PASSWORD" = dynamic("vault", {
         path = "kv/data/hashicups-db"
         key = "data/password"
       })
     }
   }
   build {
-    use "docker" {
-      context = "${path.project}"
-      dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.postgres",{
-        version = var.versions.postgres
-      })
-      disable_entrypoint = true
-    }
-    # use "docker-pull" {
-    #   image = "hashicorpdemoapp/product-api-db"
-    #   tag   = var.versions.postgres
+    ## Use the stanza below if we want to inject the entrypoint manually
+    # use "docker" {
+    #   context = "${path.project}"
+    #   dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.postgres",{
+    #     version = var.versions.postgres
+    #   })
+    #   disable_entrypoint = true
     # }
+    use "docker-pull" {
+      image = "hashicorpdemoapp/product-api-db"
+      tag   = var.versions.postgres
+      disable_entrypoint = false
+    }
     registry {
       use "docker" {
         image = "${var.registry}/hashicups-db"
@@ -204,15 +212,21 @@ app "product-api" {
   path = "${path.project}/product-api"
 
   build {
-    use "docker" {
-      context = "${path.project}"
-      dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.product-api",{
-        version = var.versions.product-api
-      })
-      buildkit = true
-      platform = var.platform
-      disable_entrypoint = true
+    use "docker-pull" {
+      image = "hashicorpdemoapp/product-api"
+      tag   = var.versions.product-api
+      disable_entrypoint = false
     }
+    ## Use the stanza below if we want to inject the entrypoint manually
+    # use "docker" {
+    #   context = "${path.project}"
+    #   dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.product-api",{
+    #     version = var.versions.product-api
+    #   })
+    #   buildkit = true
+    #   platform = var.platform
+    #   disable_entrypoint = true
+    # }
     registry {
      use "docker" {
       image = "${var.registry}/hashicups-${app.name}"
@@ -253,13 +267,19 @@ app "public-api" {
   }
 
   build {
-    use "docker" {
-      context = "${path.project}"
-      dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.public-api",{
-        version = var.versions.public-api
-      })
-      disable_entrypoint = true
+    use "docker-pull" {
+      image = "hashicorpdemoapp/public-api"
+      tag   = var.versions.public-api
+      disable_entrypoint = false
     }
+    ## Use the stanza below if we want to inject the entrypoint manually
+    # use "docker" {
+    #   context = "${path.project}"
+    #   dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.public-api",{
+    #     version = var.versions.public-api
+    #   })
+    #   disable_entrypoint = true
+    # }
     registry {
       use "docker" {
         image = "${var.registry}/hashicups-${app.name}"
@@ -299,13 +319,19 @@ app "frontend" {
   }
 
   build {
-    use "docker" {
-      context = "${path.project}"
-      dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.frontend",{
-        version = var.versions.frontend,
-      })
-      disable_entrypoint = true
+    use "docker-pull" {
+      image = "hashicorpdemoapp/frontend"
+      tag   = var.versions.frontend
+      disable_entrypoint = false
     }
+    ## Use the stanza below if we want to inject the entrypoint manually
+    # use "docker" {
+    #   context = "${path.project}"
+    #   dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.frontend",{
+    #     version = var.versions.frontend,
+    #   })
+    #   disable_entrypoint = true
+    # }
     registry {
       use "docker" {
         image = "${var.registry}/hashicups-${app.name}"
