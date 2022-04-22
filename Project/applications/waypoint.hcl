@@ -166,7 +166,7 @@ app "payments" {
     use "docker" {
       buildkit = true
       platform = var.platform
-      dockerfile = "${path.app}/Dockerfile"
+      dockerfile = "${path.app}/Dockerfile.${regex("[^/]+$",var.platform)}"
       disable_entrypoint = true
     }
     # use "pack" {
