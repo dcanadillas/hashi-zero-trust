@@ -58,7 +58,7 @@ You will need some pieces to work with this repo
 * [kubectl](https://kubernetes.io/docs/tasks/tools/#kubectl) CLI tool
 * [Docker](https://docs.docker.com/get-docker/) local installation
 * [Waypoint binary](https://www.waypointproject.io/downloads)
-
+* [JQ](https://stedolan.github.io/jq/) installed (installation scripts are using this tool to parse JSONs)
 
 
 ## Quickly deploy everything

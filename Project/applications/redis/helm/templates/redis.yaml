@@ -41,6 +41,7 @@ spec:
     metadata:
       annotations:
         consul.hashicorp.com/connect-inject: "true"
+        consul.hashicorp.com/transparent-proxy-exclude-outbound-ports: "9701"
       labels:
         app: redis
         service: redis

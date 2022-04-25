@@ -2,7 +2,7 @@
 global:
   datacenter: dcanadillas
   name: consul
-  image: "hashicorp/consul:1.11.4"
+  image: "hashicorp/consul:1.12.0"
   tls:
     enabled: true
   acls:
@@ -16,7 +16,7 @@ global:
     enabled: true
     enableGatewayMetrics: true
   # We change from envoy-alpine image because we may want to deploy in K8s in ARM, so Envoy image can be ARM based
-  imageEnvoy: envoyproxy/envoy:v1.20.2
+  imageEnvoy: envoyproxy/envoy:v1.22.0
 
 # Enable the Consul Web UI via a NodePort
 ui:
@@ -42,12 +42,12 @@ server:
   disruptionBudget:
     enabled: true
     maxUnavailable: 0
-  # We are setting the tokens to play around
+  # We are setting the tokens to play around. For versions prior to 1.11 use "acl.tokens.master"
   extraConfig: |
     {
       "acl": {
         "tokens": {
-          "master": "C0nsulR0cks",
+          "initial_management": "C0nsulR0cks",
           "agent": "C0nsulR0cks"
         }
       }
