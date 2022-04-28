@@ -1,2 +1,2 @@
-waypoint-entrypoint filter=lfs diff=lfs merge=lfs -text
-**/waypoint-entrypoint filter=lfs diff=lfs merge=lfs -text
+# waypoint-entrypoint filter=lfs diff=lfs merge=lfs -text
+# **/waypoint-entrypoint filter=lfs diff=lfs merge=lfs -text
