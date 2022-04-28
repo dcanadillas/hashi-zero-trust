@@ -36,8 +36,8 @@ client:
 
 # Use only one Consul server for local development
 server:
-  replicas: 1
-  bootstrapExpect: 1
+  replicas: 3
+  bootstrapExpect: 3
 
   disruptionBudget:
     enabled: true
@@ -55,7 +55,7 @@ server:
 
 # apiGateway:
 #   enabled: true
-#   image: hashicorp/consul-api-gateway:0.1.0
+#   image: hashicorp/consul-api-gateway:0.2.0
 #   managedGatewayClass:
 #     enabled: true
 #     serviceType: LoadBalancer
@@ -70,7 +70,6 @@ ingressGateways:
         - port: 8080
         - port: 8443
         - port: 5432
-
   
   gateways:
     - name: ingress-gateway
@@ -79,8 +78,8 @@ ingressGateways:
       # ports:
       #   - port: 8080
       #     nodePort: null
-      #   # - port: 5432
-      #   #   nodePort: null
+      #   - port: 5432
+      #     nodePort: null
       #   - port: 8443
       #     nodePort: null
 

@@ -12,3 +12,9 @@ spec:
           # namespace: apps # <== For Consul Enterprise Namespaces
           hosts: 
             - '*'
+    # Vault (outside of the mesh) needs to connect to DB for Dynamic Secrets
+    - port: 5432
+      protocol: tcp
+      services:
+        - name: postgres
+          # namespace: apps # <== For Consul Enterprise Namespaces

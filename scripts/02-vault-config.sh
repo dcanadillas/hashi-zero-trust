@@ -31,6 +31,9 @@ path "kv/hashicups-db" {
 path "kv/data/hashicups-db" {
   capabilities = ["read", "update"]
 }
+path "database/creds/hashicups-db" {
+  capabilities = ["read"]
+}
 path "transit/*" {
   capabilities = ["read", "update"]
 }
@@ -54,11 +57,31 @@ kubectl exec -ti vault-0 -n $NS -- vault write -f transit/keys/payments
 
 echo -e "\n---\n"
 
-echo -e "Storing the secrets in Vault for our application Postgres database \n"
+echo -e "Storing the static secrets in Vault for our application Postgres database \n"
 kubectl exec -ti vault-0 -n $NS -- vault secrets enable -version=2 kv
 kubectl exec -ti vault-0 -n $NS -- vault kv put kv/db username=postgres password=password
 kubectl exec -ti vault-0 -n $NS -- vault kv put kv/hashicups-db username=postgres password=password
 
+echo -e "\n---\n"
+
+echo -e "Configuring the Postgres Dynamic Engine \n"
+kubectl exec -ti vault-0 -n $NS -- vault secrets enable database
+kubectl exec -ti vault-0 -n $NS -- vault write database/config/my-postgresql-database \
+  plugin_name=postgresql-database-plugin \
+  allowed_roles="hashicups-db" \
+  connection_url="postgresql://{{username}}:{{password}}@consul-ingress-gateway.consul:5432/products?sslmode=disable" \
+  username="postgres" \
+  password="password"
+
+echo -e "\n---\n"
+
+echo -e "Configuring the Postgres role \n"
+kubectl exec -ti vault-0 -n $NS -- vault write database/roles/hashicups-db \
+  db_name=my-postgresql-database \
+  creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
+      GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
+  default_ttl="1h" \
+  max_ttl="24h"
 echo -e "\n---\n"
 
 echo -e "Let's enable the Kubernetes auth method in Vault... \n "

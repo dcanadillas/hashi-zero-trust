@@ -25,9 +25,7 @@ waypoint context use context-zerotrust
 
 waypoint context verify
 
-echo -e "===> Initializing project...\n"
-
-
+echo -e "===> Configuring Vault integration...\n"
 
 waypoint config source-set \
 -type=vault \

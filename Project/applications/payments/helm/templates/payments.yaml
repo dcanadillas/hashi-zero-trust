@@ -48,6 +48,7 @@ spec:
       serviceAccountName: payments
       containers:
         - name: payments
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           ports:
             - containerPort: 8080
