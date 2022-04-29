@@ -70,6 +70,7 @@ kubectl exec -ti vault-0 -n $NS -- vault write database/config/my-postgresql-dat
   plugin_name=postgresql-database-plugin \
   allowed_roles="hashicups-db" \
   connection_url="postgresql://{{username}}:{{password}}@consul-ingress-gateway.consul:5432/products?sslmode=disable" \
+  verify_connection="false" \
   username="postgres" \
   password="password"
 

@@ -34,12 +34,14 @@ spec:
 apiVersion: consul.hashicorp.com/v1alpha1
 kind: ServiceIntentions
 metadata:
-  name: product-api-to-postgres
+  name: product-api-and-ingress-to-postgres
 spec:
   destination:
     name: postgres
   sources:
     - name: product-api
+      action: allow
+    - name: ingress-gateway
       action: allow
 ---
 apiVersion: consul.hashicorp.com/v1alpha1
@@ -63,3 +65,4 @@ spec:
   sources:
     - name: ingress-gateway
       action: allow
+
