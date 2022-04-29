@@ -93,7 +93,7 @@ unseal_vault () {
   local VAULT_PODS=($(kubectl get po -n $VAULT_NS -l component=server -o json | jq -r '.items[].metadata.name'))
   local UNSEAL_KEY=$(kubectl get secret vault-init-log -n $VAULT_NS -o jsonpath={.data.unseal_key} | base64 -d)
   for i in ${VAULT_PODS[@]};do
-    kubectl exec $i -n $VAULT_NS -- vault operator unseal $UNSEAL_KEY
+    kubectl exec -ti $i -n $VAULT_NS -- vault operator unseal "${UNSEAL_KEY}"
     sleep 20
   done
 }

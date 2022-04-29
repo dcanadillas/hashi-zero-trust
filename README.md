@@ -149,7 +149,7 @@ waypoint up
 > Also, if you can build the whole project building and doing a push to your container registry. This can be done in the other Waypoint configuration located at `Project/applications/waypoint.hcl`. Take a look at [this `README`](./Project/applications/README.md).
 
 The background process of previous commands is:
-* It pulls the required microservices of the application from ``ghcr.io/dcanadillas/hashicups/*` using the [Waypoint Docker Plugin](https://www.waypointproject.io/plugins/docker#docker-pull-builder)
+* It pulls the required microservices of the application from `ghcr.io/dcanadillas/hashicups/*` using the [Waypoint Docker Plugin](https://www.waypointproject.io/plugins/docker#docker-pull-builder)
 * It deploys the different services as Helm releases by the usage of the [Waypoing Helm plugin](https://www.waypointproject.io/plugins/helm#helm)
 
 Now you can access to your application in your web browser by connecting to the Consul Ingress Gateway. It is running as a `LoadBalancer` service, so you can get the URL by:
