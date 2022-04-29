@@ -46,6 +46,19 @@ spec:
         # consul.hashicorp.com/connect-service: payments
     spec:
       serviceAccountName: payments
+      volumes:
+        - name: properties
+          configMap:
+            name: app-properties
+            items:
+            - key: config
+              path: application.properties
+        - name: bootstrap
+          configMap:
+            name: bootstrap-payments
+            items:
+            - key: config
+              path: bootstrap.yaml
       containers:
         - name: payments
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -56,3 +69,10 @@ spec:
           env:
           {{- toYaml . | nindent 12 }}
           {{- end }}
+          volumeMounts:
+            - name: properties
+              mountPath: /application.properties
+              subPath: application.properties
+            - name: bootstrap
+              mountPath: /bootstrap.yaml
+              subPath: bootstrap.yaml

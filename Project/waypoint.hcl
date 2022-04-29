@@ -9,16 +9,27 @@ variable "versions" {
   })
   default = {
     redis = "latest"
-    payments = "v0.0.15"
-    postgres = "v0.0.19"
-    product-api = "v0.0.19"
-    public-api = "v0.0.5"
+    payments = "v0.0.16"
+    postgres = "v0.0.22"
+    product-api = "v0.0.22"
+    public-api = "v0.0.7"
     frontend = "v0.0.7"
   }
 }
 
+variable "encryption" {
+  type = object({
+    enabled = string
+    engine = string
+  })
+  default = {
+    enabled = "true"
+    engine = "transit"
+  }
+}
+
 variable "registry" {
-  default = "gcr.io/hc-dcanadillas/hashicups"
+  default = "ghcr.io/dcanadillas/hashicups"
 }
 
 variable "k8s_namespace" {

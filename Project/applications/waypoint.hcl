@@ -16,6 +16,16 @@ variable "versions" {
     frontend = "v0.0.5"
   }
 }
+variable "encryption" {
+  type = object({
+    enabled = string
+    engine = string
+  })
+  default = {
+    enabled = "true"
+    engine = "transit"
+  }
+}
 # variable "docker_creds" {
 #   type = object({
 #     username = string
@@ -163,20 +173,25 @@ app "payments" {
   }
 
   build {
-    hook {
-      when = "before"
-      command = ["make", "-C", "${path.app}", "clean"]
+    use "docker-pull" {
+      image = "hashicorpdemoapp/payments"
+      tag   = var.versions.payments
+      disable_entrypoint = false
     }
-    hook {
-      when = "before"
-      command = ["make", "-C", "${path.app}", "build"]
-    }
-    use "docker" {
-      buildkit = true
-      platform = var.platform
-      dockerfile = "${path.app}/Dockerfile.${regex("[^/]+$",var.platform)}"
-      disable_entrypoint = true
-    }
+    # hook {
+    #   when = "before"
+    #   command = ["make", "-C", "${path.app}", "clean"]
+    # }
+    # hook {
+    #   when = "before"
+    #   command = ["make", "-C", "${path.app}", "build"]
+    # }
+    # use "docker" {
+    #   buildkit = true
+    #   platform = var.platform
+    #   dockerfile = "${path.app}/Dockerfile.${regex("[^/]+$",var.platform)}"
+    #   disable_entrypoint = true
+    # }
     # use "pack" {
     #   builder = "gcr.io/buildpacks/builder:v1"
     #   # disable_entrypoint = true
@@ -191,6 +206,10 @@ app "payments" {
   }
 
   deploy {
+    # hook {
+    #   when = "before"
+    #   command = ["kubectl", "-f", templatefile("${path.project}/payments/helm/transit.yaml,)"]
+    # }
     use "helm" {
       name  = app.name
       chart = "${path.app}/../helm"
