@@ -1,15 +1,20 @@
+FROM hashicorp/waypoint:latest as waypoint
+
+FROM hashicorpdemoapp/payments:${version} as payments
+
 FROM openjdk:18.0.1-slim
 
-COPY ./build/libs/spring-boot-payments-0.0.15.jar .
+COPY --from=waypoint /usr/bin/waypoint-entrypoint /usr/local/bin
+COPY --from=payments /spring-boot-payments-${jversion}.jar .
 
-RUN apt update && \
-  apt install -y curl unzip
+# RUN apt update && \
+#   apt install -y curl unzip
 
-RUN curl "https://releases.hashicorp.com/waypoint-entrypoint/0.8.1/waypoint-entrypoint_0.8.1_linux_amd64.zip" -o waypoint-entrypoint.zip
+#RUN curl "https://releases.hashicorp.com/waypoint-entrypoint/0.8.1/waypoint-entrypoint_0.8.1_linux_amd64.zip" -o waypoint-entrypoint.zip
 
-RUN unzip waypoint-entrypoint.zip && \ 
-  mv waypoint-entrypoint /usr/local/bin/waypoint-entrypoint
+#RUN unzip waypoint-entrypoint.zip && \ 
+#  mv waypoint-entrypoint /usr/local/bin/waypoint-entrypoint
 
 ENTRYPOINT [ "/usr/local/bin/waypoint-entrypoint" ]
 
-CMD ["java", "-jar", "./spring-boot-payments-0.0.15.jar"]
+CMD ["java", "-jar", "./spring-boot-payments-${jversion}.jar"]

@@ -84,7 +84,7 @@ spec:
       
       initContainers:
         - name: consul-template-init
-          image: hashicorp/consul-template
+          image: hashicorp/consul-template:latest
           command: 
             - consul-template
           args:
@@ -130,7 +130,7 @@ spec:
               mountPath: /config
               readOnly: true
         - name: consul-template-sidecar
-          image: hashicorp/consul-template
+          image: hashicorp/consul-template:latest
           args:
             - "-consul-addr=consul-server.consul:8501"
             # - "-consul-token=c6d96bd5-299a-3aae-5b46-ded5cf117684"

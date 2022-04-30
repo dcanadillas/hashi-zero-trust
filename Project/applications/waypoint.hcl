@@ -173,11 +173,6 @@ app "payments" {
   }
 
   build {
-    use "docker-pull" {
-      image = "hashicorpdemoapp/payments"
-      tag   = var.versions.payments
-      disable_entrypoint = false
-    }
     # hook {
     #   when = "before"
     #   command = ["make", "-C", "${path.app}", "clean"]
@@ -186,11 +181,23 @@ app "payments" {
     #   when = "before"
     #   command = ["make", "-C", "${path.app}", "build"]
     # }
-    # use "docker" {
-    #   buildkit = true
-    #   platform = var.platform
-    #   dockerfile = "${path.app}/Dockerfile.${regex("[^/]+$",var.platform)}"
-    #   disable_entrypoint = true
+    hook {
+      when = "before"
+      command = ["echo", "${trimprefix(var.versions.payments,"v")}"]
+    }
+    use "docker" {
+      buildkit = true
+      platform = var.platform
+      dockerfile = templatefile("${path.app}/Dockerfile.${regex("[^/]+$",var.platform)}", {
+        version = var.versions.payments,
+        jversion = "${trimprefix(var.versions.payments,"v")}"
+      })
+      disable_entrypoint = true
+    }
+    # use "docker-pull" {
+    #   image = "hashicorpdemoapp/payments"
+    #   tag   = var.versions.payments
+    #   disable_entrypoint = false
     # }
     # use "pack" {
     #   builder = "gcr.io/buildpacks/builder:v1"

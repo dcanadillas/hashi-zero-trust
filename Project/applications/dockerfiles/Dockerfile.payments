@@ -1,10 +1,10 @@
 FROM hashicorp/waypoint:latest as waypoint
 
-FROM dcanadillas/hashicups-payments:${version}
+FROM hashicorpdemoapp/payments:${version} as payments
 
 COPY --from=waypoint /usr/bin/waypoint-entrypoint /usr/local/bin 
 # COPY ./waypoint-entrypoint /usr/local/bin/
 
 ENTRYPOINT [ "waypoint-entrypoint" ] 
-CMD [ "java", "-jar", "./spring-boot-payments-${jar_version}.jar" ]
+CMD [ "java", "-jar", "./spring-boot-payments-${jversion}.jar" ]
 
