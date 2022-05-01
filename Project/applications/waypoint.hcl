@@ -173,18 +173,6 @@ app "payments" {
   }
 
   build {
-    # hook {
-    #   when = "before"
-    #   command = ["make", "-C", "${path.app}", "clean"]
-    # }
-    # hook {
-    #   when = "before"
-    #   command = ["make", "-C", "${path.app}", "build"]
-    # }
-    hook {
-      when = "before"
-      command = ["echo", "${trimprefix(var.versions.payments,"v")}"]
-    }
     use "docker" {
       buildkit = true
       platform = var.platform
@@ -199,10 +187,6 @@ app "payments" {
     #   tag   = var.versions.payments
     #   disable_entrypoint = false
     # }
-    # use "pack" {
-    #   builder = "gcr.io/buildpacks/builder:v1"
-    #   # disable_entrypoint = true
-    # }
     registry {
       use "docker" {
         image = "${var.registry}/hashicups-${app.name}"
@@ -213,10 +197,6 @@ app "payments" {
   }
 
   deploy {
-    # hook {
-    #   when = "before"
-    #   command = ["kubectl", "-f", templatefile("${path.project}/payments/helm/transit.yaml,)"]
-    # }
     use "helm" {
       name  = app.name
       chart = "${path.app}/../helm"
