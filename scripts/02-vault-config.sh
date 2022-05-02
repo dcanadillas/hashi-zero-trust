@@ -144,7 +144,7 @@ kubectl exec -ti vault-0 -n $NS -- vault read auth/kubernetes/role/waypoint
 echo -e "\n---\n"
 
 # We set "VAULT_ENT" env variable in the Makefile to configure Enterprise encryption features.
-if [ "$VAULT_ENT" == "enabled" ],then
+if [ "$VAULT_ENT" == "enabled" ];then
   echo -e "Let's configure Vault Enterprise Transform encyption... \n "
   echo -e "\n\n"
   kubectl exec -ti vault-0 -n $NS -- vault secrets enable transform

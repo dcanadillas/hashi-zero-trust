@@ -1,6 +1,9 @@
 build/**
 **/.waypoint/
 
+**/data.db
+**/waypoint-restore.db.lock
+
 **/*.wpvars
 images-runner/**
 

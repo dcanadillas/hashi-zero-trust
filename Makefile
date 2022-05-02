@@ -31,8 +31,8 @@ install:
 	@./scripts/01-deploy.sh $(ABS_VAULT_VALUES) $(ABS_CONSUL_VALUES) $(ABS_WAYPOINT_VALUES)
 
 install-ent:
-	@echo "\nUsing these values files: \n\n    VAULT: $(ABS_VAULT_VALUES)\n    CONSUL: $(ABS_CONSUL_VALUES)\n    WAYPOINT: $(ABS_WAYPOINT_VALUES)\n"
-	@read -p "Check that Vault Enterprise license is in file: ${VAULT_LICENSE}"
+	@echo "\nUsing these values files: \n\n    VAULT: $(ABS_VAULT_VALUES)\n    CONSUL: $(ABS_CONSUL_VALUES)\n    WAYPOINT: $(ABS_WAYPOINT_VALUES)\n";
+	@read -p "Check that Vault Enterprise license is in file: ${VAULT_LICENSE}. Continue?... (Crtl-C to Cancel) " CONTINUE;
 	@VAULT_ENT_YAML=${VAULT_ENT_FILE} VAULT_LIC=${VAULT_LICENSE} ./scripts/01-deploy.sh $(ABS_VAULT_VALUES) $(ABS_CONSUL_VALUES) $(ABS_WAYPOINT_VALUES)
 
 vault:
