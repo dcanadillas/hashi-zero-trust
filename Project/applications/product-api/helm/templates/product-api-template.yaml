@@ -84,7 +84,7 @@ spec:
       
       initContainers:
         - name: consul-template-init
-          image: hashicorp/consul-template:latest
+          image: hashicorp/consul-template
           command: 
             - consul-template
           args:
@@ -108,6 +108,7 @@ spec:
       containers:
         - name: product-api
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           ports:
             - containerPort: 9090
               protocol: TCP
@@ -130,7 +131,7 @@ spec:
               mountPath: /config
               readOnly: true
         - name: consul-template-sidecar
-          image: hashicorp/consul-template:latest
+          image: hashicorp/consul-template
           args:
             - "-consul-addr=consul-server.consul:8501"
             # - "-consul-token=c6d96bd5-299a-3aae-5b46-ded5cf117684"

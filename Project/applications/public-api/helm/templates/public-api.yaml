@@ -51,6 +51,7 @@ spec:
       containers:
         - name: public-api
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }} #localhost:5000/
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
           ports:
             - containerPort: 8080
           {{- with .Values.env }}
@@ -59,7 +60,6 @@ spec:
           {{- end }}
         - name: jaeger-agent
           image: jaegertracing/jaeger-agent:latest
-          imagePullPolicy: IfNotPresent
           ports:
           - containerPort: 5775
             name: zk-compact-trft

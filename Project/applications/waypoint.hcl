@@ -6,47 +6,43 @@ variable "versions" {
     product-api = string
     public-api = string
     frontend = string
+    nginx = string
   })
   default = {
     redis = "latest"
-    payments = "v0.0.12"
-    postgres = "v0.0.17"
-    product-api = "v0.0.11"
-    public-api = "v0.0.4"
-    frontend = "v0.0.5"
+    payments = "v0.0.16"
+    postgres = "v0.0.21"
+    product-api = "v0.0.21"
+    public-api = "v0.0.6"
+    frontend = "v1.0.3"
+    nginx = "alpine"
   }
 }
 variable "encryption" {
   type = object({
+    db = string
     enabled = string
     engine = string
   })
   default = {
+    db = "redis"
     enabled = "true"
     engine = "transit"
   }
 }
-# variable "docker_creds" {
-#   type = object({
-#     username = string
-#     password = string
-#   })
-# }
 
 variable "registry" {
-}
-
-variable "platform" {
-  default = "linux/amd64"
 }
 
 variable "k8s_namespace" {
   default = "apps"
 }
 
+variable "platform" {
+  default = "linux/amd64"
+}
 
-
-project = "hashidemo-dcanadillas"
+project = "hashicups-build-dcanadillas"
 runner {
   enabled = true
 
@@ -58,16 +54,6 @@ runner {
 app "redis" {
   path = "${path.project}/redis"
   build {
-    ## Use the stanza below if we want to inject the entrypoint manually
-    # use "docker" {
-    #   context = "${path.project}"
-    #   dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.redis",{
-    #     version = var.versions.redis
-    #   })
-    #   buildkit = true
-    #   platform = var.platform
-    #   disable_entrypoint = true
-    # }
     use "docker-pull" {
       image = "redis"
       tag = var.versions.redis
@@ -89,15 +75,8 @@ app "redis" {
       chart = "${path.app}/helm"
       namespace = var.k8s_namespace
 
-      set {
-        name  = "deployment.name"
-        value = "redis"
-      }
-
-      # We use a values file so we can set the entrypoint environment
-      # variables into a rich YAML structure. This is easier than --set
       values = [
-        file(templatefile("${path.app}/helm/values.yaml.tpl")),
+        file(templatefile("${path.app}/helm/values.yaml.tpl",)),
       ]
     }
   }
@@ -122,17 +101,9 @@ app "postgres" {
     }
   }
   build {
-    ## Use the stanza below if we want to inject the entrypoint manually
-    # use "docker" {
-    #   context = "${path.project}"
-    #   dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.postgres",{
-    #     version = var.versions.postgres
-    #   })
-    #   disable_entrypoint = true
-    # }
     use "docker-pull" {
       image = "hashicorpdemoapp/product-api-db"
-      tag   = var.versions.postgres
+      tag   = "${var.versions.postgres}"
       disable_entrypoint = false
     }
     registry {
@@ -150,19 +121,15 @@ app "postgres" {
       chart = "${path.app}/helm"
       namespace = var.k8s_namespace
 
-      set {
-        name  = "deployment.name"
-        value = app.name
-      }
       values = [
-        file(templatefile("${path.app}/helm/values.yaml.tpl")),
+        file(templatefile("${path.app}/helm/values.yaml.tpl",)),
       ]
     }
   }
 }
 
 app "payments" {
-  path = "${path.project}/payments/application"
+  path = "${path.project}/payments"
   labels = {
     "service" = "payments",
     "env"     = "dev"
@@ -173,10 +140,14 @@ app "payments" {
   }
 
   build {
+    hook {
+      when = "before"
+      command = ["echo", "${trimprefix(var.versions.payments,"v")}"]
+    }
     use "docker" {
       buildkit = true
       platform = var.platform
-      dockerfile = templatefile("${path.app}/Dockerfile.${regex("[^/]+$",var.platform)}", {
+      dockerfile = templatefile("${path.app}/dockerfiles/Dockerfile.${regex("[^/]+$",var.platform)}", {
         version = var.versions.payments,
         jversion = "${trimprefix(var.versions.payments,"v")}"
       })
@@ -186,6 +157,10 @@ app "payments" {
     #   image = "hashicorpdemoapp/payments"
     #   tag   = var.versions.payments
     #   disable_entrypoint = false
+    # }
+    # use "pack" {
+    #   builder = "gcr.io/buildpacks/builder:v1"
+    #   # disable_entrypoint = true
     # }
     registry {
       use "docker" {
@@ -199,20 +174,15 @@ app "payments" {
   deploy {
     use "helm" {
       name  = app.name
-      chart = "${path.app}/../helm"
-      namespace = var.k8s_namespace
+      chart = "${path.app}/helm"
+      namespace = "apps"
 
-      set {
-        name  = "deployment.name"
-        value = app.name
-      }
       values = [
-        file(templatefile("${path.project}/payments/helm/values.yaml.tpl",)),
+        file(templatefile("${path.app}/helm/values.yaml.tpl",)),
       ]
     }
   }
 }
-
 
 app "product-api" {
   path = "${path.project}/product-api"
@@ -250,10 +220,6 @@ app "product-api" {
       chart = "${path.app}/helm"
       namespace = var.k8s_namespace
 
-      set {
-        name  = "deployment.name"
-        value = app.name
-      }
       values = [
         file(templatefile("${path.app}/helm/values.yaml.tpl")),
       ]
@@ -275,17 +241,9 @@ app "public-api" {
   build {
     use "docker-pull" {
       image = "hashicorpdemoapp/public-api"
-      tag   = var.versions.public-api
-      disable_entrypoint = false
+      tag   = "${var.versions.public-api}"
+      disable_entrypoint = true
     }
-    ## Use the stanza below if we want to inject the entrypoint manually
-    # use "docker" {
-    #   context = "${path.project}"
-    #   dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.public-api",{
-    #     version = var.versions.public-api
-    #   })
-    #   disable_entrypoint = true
-    # }
     registry {
       use "docker" {
         image = "${var.registry}/hashicups-${app.name}"
@@ -299,12 +257,8 @@ app "public-api" {
     use "helm" {
       name  = app.name
       chart = "${path.app}/helm"
-      namespace = var.k8s_namespace
+      namespace = "apps"
 
-      set {
-        name  = "deployment.name"
-        value = app.name
-      }
       values = [
         file(templatefile("${path.app}/helm/values.yaml.tpl",)),
       ]
@@ -327,17 +281,9 @@ app "frontend" {
   build {
     use "docker-pull" {
       image = "hashicorpdemoapp/frontend"
-      tag   = var.versions.frontend
+      tag   = "${var.versions.frontend}"
       disable_entrypoint = false
     }
-    ## Use the stanza below if we want to inject the entrypoint manually
-    # use "docker" {
-    #   context = "${path.project}"
-    #   dockerfile = templatefile("${path.project}/dockerfiles/Dockerfile.frontend",{
-    #     version = var.versions.frontend,
-    #   })
-    #   disable_entrypoint = true
-    # }
     registry {
       use "docker" {
         image = "${var.registry}/hashicups-${app.name}"
@@ -351,15 +297,51 @@ app "frontend" {
     use "helm" {
       name  = app.name
       chart = "${path.app}/helm"
-      namespace = var.k8s_namespace
+      namespace = "apps"
 
-      set {
-        name  = "deployment.name"
-        value = app.name
-      }
       values = [
-        file(templatefile("${path.app}/helm/values.yaml.tpl",)),
+        file(templatefile("${path.app}/helm/values.yaml.tpl",{
+          version = "${trimprefix(var.versions.frontend,"v")}"
+        })),
       ]
     }
   }
 }
+
+# app "nginx" {
+#   path = "${path.project}/nginx"
+#   labels = {
+#     "service" = "nginx",
+#     "env"     = "dev"
+#   }
+
+#   url {
+#     auto_hostname = false
+#   }
+
+#   build {
+#     use "docker-pull" {
+#       image = "nginx"
+#       tag   = "alpine"
+#       disable_entrypoint = false
+#     }
+#     registry {
+#       use "docker" {
+#         image = "${var.registry}/hashicups-${app.name}"
+#         tag   = "${var.versions.nginx}-waypoint-${regex("[^/]+$",var.platform)}"
+#         # local = true
+#       }
+#     }
+#   }
+
+#   deploy {
+#     use "helm" {
+#       name  = app.name
+#       chart = "${path.app}/helm"
+#       namespace = "apps"
+#       values = [
+#         file(templatefile("${path.app}/helm/values.yaml.tpl",)),
+#       ]
+#     }
+#   }
+# }

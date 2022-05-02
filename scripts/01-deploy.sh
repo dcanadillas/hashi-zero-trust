@@ -109,8 +109,12 @@ metadata:
 EOF
 
   echo -e "\nInstalling Vault with Helm ====> \n"
-
-  helm install vault -n $VAULT_NS -f $VAULT_VALUES hashicorp/vault
+  if [ -z "$1" ];then
+    helm install vault -n $VAULT_NS -f $VAULT_VALUES hashicorp/vault
+  else
+    kubectl create secret generic vault-ent-license -n $VAULT_NS --from-file license="$1"
+    helm install vault -n $VAULT_NS -f $VAULT_VALUES -f $VAULT_ENT_YAML hashicorp/vault
+  fi
 
   sleep 2
 
@@ -222,8 +226,15 @@ helm repo update
 
 # Install Vault
 if helm_not_installed vault $VAULT_NS;then
-  install_vault
-  # Follwing line is only to check for a development Vault (so only check in the first vault-0 pod)
+  echo "License is: $VAULT_LIC"
+  if [ -n "$VAULT_LIC" ];then
+    echo "License in: $VAULT_LIC"
+    install_vault $VAULT_LIC
+  else
+    install_vault
+  fi
+
+  # Following line is only to check for a development Vault (so only check in the first vault-0 pod)
   echo -e "\nVault installed. Let's unseal Vault..."
   SEALED="$(kubectl exec vault-0 -n $VAULT_NS -- vault status -format json | jq -r .sealed)"
   if [ "$SEALED" == "false" ];then

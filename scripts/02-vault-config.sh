@@ -80,7 +80,8 @@ echo -e "Configuring the Postgres role \n"
 kubectl exec -ti vault-0 -n $NS -- vault write database/roles/hashicups-db \
   db_name=my-postgresql-database \
   creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
-      GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
+      GRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA public TO \"{{name}}\"; \
+      GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO \"{{name}}\";" \
   default_ttl="1h" \
   max_ttl="24h"
 echo -e "\n---\n"
@@ -139,3 +140,18 @@ echo "    \$ vault read auth/kubernetes/role/waypoint"
 echo -e "\n\n"
 kubectl exec -ti vault-0 -n $NS -- vault read auth/kubernetes/role/waypoint
 
+
+echo -e "\n---\n"
+
+# We set "VAULT_ENT" env variable in the Makefile to configure Enterprise encryption features.
+if [ "$VAULT_ENT" == "enabled" ],then
+  echo -e "Let's configure Vault Enterprise Transform encyption... \n "
+  echo -e "\n\n"
+  kubectl exec -ti vault-0 -n $NS -- vault secrets enable transform
+  kubectl exec -ti vault-0 -n $NS -- vault write transform/role/payments transformations=card-number
+  kubectl exec -ti vault-0 -n $NS -- vault write transform/transformation/card-number \
+    type=fpe \
+    template="builtin/creditcardnumber" \
+    tweak_source=internal \
+    allowed_roles=payments
+fi

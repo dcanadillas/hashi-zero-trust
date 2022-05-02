@@ -5,13 +5,12 @@ image:
   pullSecrets: null
 
 namespace: ${var.k8s_namespace}
-encryption: 
+encryption:
+  db: ${var.encryption.db}
   enabled: ${var.encryption.enabled}
   engine: ${var.encryption.engine}
 
 env:
-- name: PORT
-  value: "8080"
 %{ for k,v in entrypoint.env }  
 - name: ${k}
   value: "${v}"

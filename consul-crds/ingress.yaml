@@ -8,7 +8,7 @@ spec:
     - port: 8080
       protocol: http
       services:
-        - name: frontend
+        - name: nginx
           # namespace: apps # <== For Consul Enterprise Namespaces
           hosts: 
             - '*'

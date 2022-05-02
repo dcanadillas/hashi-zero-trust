@@ -3,9 +3,6 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nginx
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: nginx
 spec:
   selector:
     app: nginx
@@ -19,18 +16,19 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: nginx
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: nginx
 automountServiceAccountToken: true
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: nginx
+spec:
+  protocol: "http"
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-configmap
-  namespace: {{ .Values.namespace }}
-  labels:
-    app: nginx
 data:
   config: |
     # /etc/nginx/conf.d/default.conf
@@ -77,7 +75,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx
-  namespace: {{ .Values.namespace }}
   labels:
     app: nginx
 spec:
@@ -102,14 +99,10 @@ spec:
                 path: default.conf
       containers:
         - name: nginx
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: nginx:alpine
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
-          {{- with .Values.env }}
-          env:
-          {{- toYaml . | nindent 12 }}
-          {{- end }}
           volumeMounts:
             - name: config
               mountPath: /etc/nginx/conf.d

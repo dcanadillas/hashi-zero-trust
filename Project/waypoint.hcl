@@ -6,23 +6,26 @@ variable "versions" {
     product-api = string
     public-api = string
     frontend = string
+    nginx = string
   })
   default = {
     redis = "latest"
     payments = "v0.0.16"
-    postgres = "v0.0.22"
-    product-api = "v0.0.22"
-    public-api = "v0.0.7"
-    frontend = "v0.0.7"
+    postgres = "v0.0.21"
+    product-api = "v0.0.21"
+    public-api = "v0.0.6"
+    frontend = "v1.0.3"
+    nginx = "alpine"
   }
 }
-
 variable "encryption" {
   type = object({
+    db = string
     enabled = string
     engine = string
   })
   default = {
+    db = "redis"
     enabled = "true"
     engine = "transit"
   }
@@ -40,7 +43,7 @@ variable "platform" {
   default = "linux/amd64"
 }
 
-project = "hashicafe-dcanadillas"
+project = "zero-trust-dcanadillas"
 runner {
   enabled = true
 
@@ -57,6 +60,11 @@ app "redis" {
       tag = "${var.versions.redis}-waypoint-${regex("[^/]+$",var.platform)}"
       disable_entrypoint = true
     }
+    # use "docker-pull" {
+    #   image = "redis"
+    #   tag = var.versions.redis
+    #   disable_entrypoint = false
+    # }
   }
   deploy {
     use "helm" {
@@ -64,15 +72,13 @@ app "redis" {
       chart = "${path.app}/helm"
       namespace = var.k8s_namespace
 
-      set {
-        name  = "deployment.name"
-        value = "redis"
-      }
       values = [
         file(templatefile("${path.app}/helm/values.yaml.tpl",{
           artifact = {
-            image = "${var.registry}/hashicups-redis",
-            tag = "${var.versions.redis}-waypoint-${regex("[^/]+$",var.platform)}"
+            image = "${var.registry}/hashicups-${app.name}",
+            tag   = "${var.versions.redis}-waypoint-${regex("[^/]+$",var.platform)}"
+            # image = "redis",
+            # tag = var.versions.redis
           },
         })),
       ]
@@ -102,6 +108,8 @@ app "postgres" {
     use "docker-pull" {
       image = "${var.registry}/hashicups-db"
       tag   = "${var.versions.postgres}-waypoint-${regex("[^/]+$",var.platform)}"
+      # image = "hashicorpdemoapp/product-api-db"
+      # tag   = "${var.versions.postgres}"
       disable_entrypoint = true
     }
   }
@@ -112,15 +120,13 @@ app "postgres" {
       chart = "${path.app}/helm"
       namespace = var.k8s_namespace
 
-      set {
-        name  = "deployment.name"
-        value = app.name
-      }
       values = [
         file(templatefile("${path.app}/helm/values.yaml.tpl",{
           artifact = {
             image = "${var.registry}/hashicups-db",
-            tag = "${var.versions.postgres}-waypoint-${regex("[^/]+$",var.platform)}"
+            tag   = "${var.versions.postgres}-waypoint-${regex("[^/]+$",var.platform)}"
+            # image = "hashicorpdemoapp/product-api-db",
+            # tag   = "${var.versions.postgres}"
           },
         })),
       ]
@@ -143,6 +149,8 @@ app "payments" {
     use "docker-pull" {
       image = "${var.registry}/hashicups-payments"
       tag   = "${var.versions.payments}-waypoint-${regex("[^/]+$",var.platform)}"
+      # image = "hashicorpdemoapp/payments"
+      # tag   = "${var.versions.payments}"
       disable_entrypoint = true
     }
   }
@@ -153,15 +161,13 @@ app "payments" {
       chart = "${path.app}/helm"
       namespace = "apps"
 
-      set {
-        name  = "deployment.name"
-        value = app.name
-      }
       values = [
         file(templatefile("${path.app}/helm/values.yaml.tpl",{
           artifact = {
-            image = "${var.registry}/hashicups-payments",
+            image = "${var.registry}/hashicups-${app.name}"
             tag   = "${var.versions.payments}-waypoint-${regex("[^/]+$",var.platform)}"
+            # image = "hashicorpdemoapp/payments",
+            # tag   = "${var.versions.payments}"
           },
         })),
       ]
@@ -176,6 +182,8 @@ app "product-api" {
     use "docker-pull" {
       image = "${var.registry}/hashicups-product-api"
       tag = "${var.versions.product-api}-waypoint-${regex("[^/]+$",var.platform)}"
+      # image = "hashicorpdemoapp/product-api"
+      # tag   = "${var.versions.product-api}"
       disable_entrypoint = true
     }
   }
@@ -186,15 +194,13 @@ app "product-api" {
       chart = "${path.app}/helm"
       namespace = var.k8s_namespace
 
-      set {
-        name  = "deployment.name"
-        value = app.name
-      }
       values = [
         file(templatefile("${path.app}/helm/values.yaml.tpl",{
           artifact = {
-            image = "${var.registry}/hashicups-product-api",
-            tag   = "${var.versions.product-api}-waypoint-${regex("[^/]+$",var.platform)}"
+            image = "${var.registry}/hashicups-${app.name}"
+            tag = "${var.versions.product-api}-waypoint-${regex("[^/]+$",var.platform)}"
+            # image = "hashicorpdemoapp/product-api",
+            # tag   = "${var.versions.product-api}"
           },
         })),
       ]
@@ -217,6 +223,8 @@ app "public-api" {
     use "docker-pull" {
       image = "${var.registry}/hashicups-public-api"
       tag   = "${var.versions.public-api}-waypoint-${regex("[^/]+$",var.platform)}"
+      # image = "hashicorpdemoapp/public-api"
+      # tag   = "${var.versions.public-api}"
       disable_entrypoint = true
     }
   }
@@ -227,15 +235,13 @@ app "public-api" {
       chart = "${path.app}/helm"
       namespace = "apps"
 
-      set {
-        name  = "deployment.name"
-        value = app.name
-      }
       values = [
         file(templatefile("${path.app}/helm/values.yaml.tpl",{
           artifact = {
-            image = "${var.registry}/hashicups-public-api",
+            image = "${var.registry}/hashicups-${app.name}"
             tag   = "${var.versions.public-api}-waypoint-${regex("[^/]+$",var.platform)}"
+            # image = "hashicorpdemoapp/public-api",
+            # tag   = "${var.versions.public-api}"
           },
         })),
       ]
@@ -259,6 +265,8 @@ app "frontend" {
     use "docker-pull" {
       image = "${var.registry}/hashicups-frontend"
       tag   = "${var.versions.frontend}-waypoint-${regex("[^/]+$",var.platform)}"
+      # image = "hashicorpdemoapp/frontend"
+      # tag   = "${var.versions.frontend}"
       disable_entrypoint = true
     }
   }
@@ -269,18 +277,57 @@ app "frontend" {
       chart = "${path.app}/helm"
       namespace = "apps"
 
-      set {
-        name  = "deployment.name"
-        value = app.name
-      }
       values = [
         file(templatefile("${path.app}/helm/values.yaml.tpl",{
+          version = "${trimprefix(var.versions.frontend,"v")}",
           artifact = {
             image = "${var.registry}/hashicups-frontend",
             tag   = "${var.versions.frontend}-waypoint-${regex("[^/]+$",var.platform)}"
+            # image = "hashicorpdemoapp/frontend",
+            # tag   = "${var.versions.frontend}"
           },
         })),
       ]
     }
   }
 }
+
+# app "nginx" {
+#   path = "${path.project}/applications/nginx"
+#   labels = {
+#     "service" = "nginx",
+#     "env"     = "dev"
+#   }
+
+#   url {
+#     auto_hostname = false
+#   }
+
+#   build {
+#     use "docker-pull" {
+#       image = "${var.registry}/hashicups-nginx"
+#       # image = "nginx"
+#       tag   = "${var.versions.nginx}-waypoint-${regex("[^/]+$",var.platform)}"
+#       # tag   = "alpine"
+#       disable_entrypoint = true
+#     }
+#   }
+
+#   deploy {
+#     use "helm" {
+#       name  = app.name
+#       chart = "${path.app}/helm"
+#       namespace = "apps"
+#       values = [
+#         file(templatefile("${path.app}/helm/values.yaml.tpl",{
+#           artifact = {
+#             image = "${var.registry}/hashicups-nginx",
+#             tag   = "${var.versions.nginx}-waypoint-${regex("[^/]+$",var.platform)}"
+#             # image = "hashicorpdemoapp/frontend",
+#             # tag   = "${var.versions.frontend}"
+#           },
+#         })),
+#       ]
+#     }
+#   }
+# }

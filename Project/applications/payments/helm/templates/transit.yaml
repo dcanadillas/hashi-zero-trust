@@ -8,7 +8,7 @@ metadata:
     app: payments
 data:
   config: |
-    app.storage=redis
+    app.storage={{ .Values.encryption.db }}
     app.encryption.enabled={{ .Values.encryption.enabled }}
     app.encryption.path={{ .Values.encryption.engine }}
     app.encryption.key=payments

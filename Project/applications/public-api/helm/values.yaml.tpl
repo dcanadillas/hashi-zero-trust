@@ -1,7 +1,7 @@
 image:
   repository: ${artifact.image}
   tag: ${artifact.tag}
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   pullSecrets: null
 
 namespace: ${var.k8s_namespace}

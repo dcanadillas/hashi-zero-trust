@@ -1,7 +1,9 @@
 build/**
-.waypoint/**
+**/.waypoint/
 
 **/*.wpvars
 images-runner/**
 
 **/waypoint-entrypoint
+
+**/ent_licenses/**

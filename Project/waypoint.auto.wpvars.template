@@ -1,10 +1,11 @@
 versions = {
     redis = "latest"
-    payments = "v0.0.15"
-    postgres = "v0.0.19"
-    product-api = "v0.0.19"
-    public-api = "v0.0.5"
-    frontend = "v0.0.7"
+    payments = "v0.0.16"
+    postgres = "v0.0.21"
+    product-api = "v0.0.21"
+    public-api = "v0.0.6"
+    frontend = "v1.0.3"
+    nginx = "alpine"
 }
 
 registry = "<your_registry>"

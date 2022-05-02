@@ -1,14 +1,15 @@
 image:
   repository: ${artifact.image}
   tag: ${artifact.tag}
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   pullSecrets: null
+  version: ${version}
 
 namespace: ${var.k8s_namespace}
 
 env:
-- name: PORT
-  value: "80"
+- name: NEXT_PUBLIC_PUBLIC_API_URL
+  value: "/"
 %{ for k,v in entrypoint.env }  
 - name: ${k}
   value: "${v}"

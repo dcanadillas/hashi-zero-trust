@@ -23,11 +23,11 @@ Instead of defining the variables in the CLI you can use a `waypoint.auto.wpvars
 ```
 versions = {
     redis = "latest"
-    payments = "v0.0.15"
-    postgres = "v0.0.19"
-    product-api = "v0.0.19"
-    public-api = "v0.0.5"
-    frontend = "v0.0.7"
+    payments = "v0.0.16"
+    postgres = "v0.0.22"
+    product-api = "v0.0.22"
+    public-api = "v0.0.7"
+    frontend = "v1.0.4"
 }
 registry = "<your_registry>"
 platform = "linux/amd64"
@@ -38,13 +38,14 @@ So you build easily with:
 waypoint build
 ```
 
+> NOTE: Please, check the versions available at [HashiCorp Demoapp Docker registry](https://hub.docker.com/search?q=hashicorpdemoapp), and also in the [GitHub repo](https://github.com/hashicorp-demoapp). Read it carefully because some of the versions deprecates some functionality.
+> This Waypoint project takes into account the changes made from `frontend` version `v0.0.8`. This means that if you want the old look&feel from HashiCups you need to select `v0.0.7` for the `frontend`, and if you want the new UI just select the latest (currently `v1.0.4`).
+
 ## Build and deploy
 
 You can also deploy from here, building and pushing the images first in your registry
 
 ```bash
-waypoint up
+waypoint up -var registry=<your_docker_registry> -var platform=<linux/amd64_or_linux/arm64>
 ```
-
-
 

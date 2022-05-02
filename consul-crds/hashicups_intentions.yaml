@@ -8,6 +8,8 @@ spec:
   sources:
     - name: frontend
       action: allow
+    - name: nginx
+      action: allow
 ---
 apiVersion: consul.hashicorp.com/v1alpha1
 kind: ServiceIntentions
@@ -62,6 +64,19 @@ metadata:
 spec:
   destination:
     name: frontend
+  sources:
+    # - name: ingress-gateway
+    #   action: allow
+    - name: nginx
+      action: allow
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: ingress-to-nginx
+spec:
+  destination:
+    name: nginx
   sources:
     - name: ingress-gateway
       action: allow

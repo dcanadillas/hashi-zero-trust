@@ -5,3 +5,39 @@ metadata:
   #namespace: apps
 spec:
   protocol: http
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: nginx
+  #namespace: apps
+spec:
+  protocol: http
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: payments
+spec:
+  protocol: "http"
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: postgres
+spec:
+  protocol: "tcp"
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: public-api
+spec:
+  protocol: "http"
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: products-api
+spec:
+  protocol: "http"

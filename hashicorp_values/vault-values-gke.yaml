@@ -16,7 +16,7 @@ server:
     repository: "hashicorp/vault"
     # repository: "hashicorp/vault-enterprise"
     tag: "1.10.0"
-    # tag: "1.10.0_ent"
+    # tag: "1.10.0-ent"
     pullPolicy: IfNotPresent
   # affinity: # <=== Empty for one node deployment
 

@@ -1,0 +1,10 @@
+server:
+  enabled: true
+  enterpriseLicense:
+    secretName: "vault-ent-license"
+    secretKey: "license"
+
+  image:
+    repository: "hashicorp/vault-enterprise"
+    tag: "1.10.0-ent"
+    pullPolicy: IfNotPresent
