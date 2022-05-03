@@ -32,7 +32,7 @@ variable "encryption" {
 }
 
 variable "registry" {
-  default = "ghcr.io/dcanadillas/hashicups"
+  default = "hcdcanadillas"
 }
 
 variable "k8s_namespace" {

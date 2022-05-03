@@ -37,6 +37,9 @@ path "database/creds/hashicups-db" {
 path "transit/*" {
   capabilities = ["read", "update"]
 }
+path "transform/*" {
+  capabilities = ["read", "update"]
+}
 EOF
 
 echo -e "Let's create a policy for reading secrets from Waypoint... \n"
@@ -149,9 +152,22 @@ if [ "$VAULT_ENT" == "enabled" ];then
   echo -e "\n\n"
   kubectl exec -ti vault-0 -n $NS -- vault secrets enable transform
   kubectl exec -ti vault-0 -n $NS -- vault write transform/role/payments transformations=card-number
-  kubectl exec -ti vault-0 -n $NS -- vault write transform/transformation/card-number \
     type=fpe \
     template="builtin/creditcardnumber" \
     tweak_source=internal \
     allowed_roles=payments
+
+  kubectl exec -ti vault-0 -n $NS -- vault write transform/template/masked-all-last4-card-number type=regex \
+    pattern='(\d{4})-(\d{4})-(\d{4})-\d\d\d\d' \
+    alphabet=builtin/numeric
+
+  kubectl exec -ti vault-0 -n $NS -- vault write transform/transformation/masked-card-number \
+    type=masking \
+    template=masked-all-last4-card-number \
+    tweak_source=internal \
+    allowed_roles=custsupport \
+    masking_character="X"
+
+  kubectl exec -ti vault-0 -n $NS -- vault write transform/role/custsupport \
+    transformations=masked-card-number
 fi

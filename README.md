@@ -132,7 +132,7 @@ If you want to deploy everything in just a couple of minutes here are the steps 
 
 ## Deploy Hashicups Application
 
-Use the main Waypoint configuration at `Project > waypoint.hcl` to deploy the application. It just deploys by pulling already built images in `ghcr.io/dcanadillas`. You just need to do the following to deploy:
+Use the main Waypoint configuration at `Project > waypoint.hcl` to deploy the application. It just deploys by pulling already built images in `hcdcanadillas` registry. You just need to do the following to deploy:
   
 ```bash
 cd Project
