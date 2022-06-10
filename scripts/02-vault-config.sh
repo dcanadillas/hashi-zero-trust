@@ -151,12 +151,21 @@ if [ "$VAULT_ENT" == "enabled" ];then
   echo -e "Let's configure Vault Enterprise Transform encyption... \n "
   echo -e "\n\n"
   kubectl exec -ti vault-0 -n $NS -- vault secrets enable transform
+
+  # Setting the transform role (used by payments service if configured)
   kubectl exec -ti vault-0 -n $NS -- vault write transform/role/payments transformations=card-number
     type=fpe \
     template="builtin/creditcardnumber" \
     tweak_source=internal \
     allowed_roles=payments
 
+  # Creating the transformation for the card-number that is using the previour role created
+  kubectl exec -ti vault-0 -n $NS -- vault write transform/transformations/fpe/card-number \
+    template="builtin/creditcardnumber" \     
+    tweak_source=internal \     
+    allowed_roles=payments
+
+  # Following configurations are for masking the numbers, but this is not used by the application
   kubectl exec -ti vault-0 -n $NS -- vault write transform/template/masked-all-last4-card-number type=regex \
     pattern='(\d{4})-(\d{4})-(\d{4})-\d\d\d\d' \
     alphabet=builtin/numeric
